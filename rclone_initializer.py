@@ -27,12 +27,12 @@ def is_rclone_ready():
 
 def read_mount_payloads():
     try:
-        with open('mounts.json', 'r') as file:
+        with open('config/mounts.json', 'r') as file:
             return json.load(file)
     except FileNotFoundError:
-        logging.error("mounts.json file not found.")
+        logging.error("config/mounts.json file not found.")
     except json.JSONDecodeError:
-        logging.error("Error decoding JSON from the mounts.json file.")
+        logging.error("Error decoding JSON from the config/mounts.json file.")
     return None
 
 def mount_payloads(mount_payloads):
