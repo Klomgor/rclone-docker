@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  rclone:
+    image: rclone/rclone:latest
+    container_name: rclone
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    devices:
+      - /dev/fuse:/dev/fuse
+    environment:
+      # Core settings
+      - TZ=${TZ:-UTC}
+      - RCLONE_USER=${RCLONE_USER:-admin}
+      - RCLONE_PASSWORD=${RCLONE_PASSWORD:-password}
+      - RCLONE_OPTS=${RCLONE_OPTS:---config /config/rclone.conf}
+      
+      # Sync settings
+      - SYNC_SRC=${SYNC_SRC:-}
+      - SYNC_DEST=${SYNC_DEST:-}
+      - SYNC_OPTS=${SYNC_OPTS:--v}
+      - SYNC_SCHEDULE=${SYNC_SCHEDULE:-0 * * * *}
+      - SYNC_ABORT_SCHEDULE=${SYNC_ABORT_SCHEDULE:-}
+      - INITIAL_SYNC=${INITIAL_SYNC:-false}
+      - HEALTH_CHECK_URL=${HEALTH_CHECK_URL:-}
+      
+      # Web GUI settings
+      - RCLONE_USERNAME=${RCLONE_USER:-admin}  # For compatibility with rclone_initializer.py
+      - RCLONE_PORT=5572
+      
+      # VFS Cache settings
+      - VFS_CACHE_MODE=${VFS_CACHE_MODE:-full}
+      - VFS_CACHE_MAX_SIZE=${VFS_CACHE_MAX_SIZE:-100G}
+    volumes:
+      - ./config:/config
+      - ./scripts:/scripts
+      - ./logs:/logs
+      - /var/cache/rclone:/var/cache/rclone
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
+      - /etc/fuse.conf:/etc/fuse.conf:ro
+      - ./mounts.json:/scripts/mounts.json:ro
+      - ${HOST_MOUNT_POINT:-/mnt/rclone}:/hostfs:shared
+    ports:
+      - "5572:5572"
+    entrypoint: ["/scripts/entrypoint.sh"]
+    restart: unless-stopped
