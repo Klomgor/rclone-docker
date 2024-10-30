@@ -44,7 +44,7 @@ rclone rcd \
     --vfs-cache-max-size $VFS_CACHE_MAX_SIZE &
 
 # Initialize mounts using rclone_initializer.py
-if [ -f /scripts/mounts.json ]; then
+if [ -f /config/mounts.json ]; then
     echo "INFO: Initializing mounts from mounts.json"
     python3 /scripts/rclone_initializer.py
 fi

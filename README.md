@@ -34,7 +34,7 @@ mkdir -p config logs
    - Use the Web GUI (note: OAuth2 configuration might require CLI setup)
 
 3. Configure mounts (optional):
-   Edit `mounts.json` to define your remote mounts:
+   Edit `config/mounts.json` to define your remote mounts:
 ```json
 [
   {
@@ -99,7 +99,7 @@ Access the Web GUI at `http://localhost:5572` with your configured credentials.
 
 ### Mount Points
 
-Remote mounts are configured through `mounts.json`. The mount points will be accessible under the specified paths in the container and on the host system through the shared volume mount.
+Remote mounts are configured through `config/mounts.json`. The mount points will be accessible under the specified paths in the container and on the host system through the shared volume mount.
 
 ### Health Checks
 
@@ -131,3 +131,40 @@ This project combines and builds upon the work of:
 - [rclone](https://github.com/rclone/rclone)
 - Original automount implementation by [coanghel](https://github.com/coanghel)
 - Original sync implementation by [bcardiff](https://github.com/bcardiff)
+
+## Additional Information from README 2.md
+
+### Usage
+
+#### Configure rclone
+
+rclone needs a configuration file where credentials to access different storage
+provider are kept.
+
+By default, this image uses a file `/config/rclone.conf` and a mounted volume may be used to keep that information persisted.
+
+A first run of the container can help in the creation of the file, but feel free to manually create one.
+
+```
+$ mkdir config
+$ docker run --rm -it -v $(pwd)/config:/config ghcr.io/robinostlund/docker-rclone-sync:latest
+```
+
+#### Perform sync in a daily basis
+
+A few environment variables allow you to customize the behavior of the sync:
+
+* `SYNC_SRC` source location for `rclone sync` command
+* `SYNC_DEST` destination location for `rclone sync` command
+* `CRON` crontab schedule `0 0 * * *` to perform sync every midnight
+* `CRON_ABORT` crontab schedule `0 6 * * *` to abort sync at 6am
+* `FORCE_SYNC` set variable to perform a sync upon boot
+* `CHECK_URL` [healthchecks.io](https://healthchecks.io) url or similar cron monitoring to perform a `GET` after a successful sync
+* `SYNC_OPTS` additional options for `rclone sync` command. Defaults to `-v`
+* `TZ` set the [timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) to use for the cron and log `America/Argentina/Buenos_Aires`
+
+```bash
+$ docker run --rm -it -v $(pwd)/config:/config -v /path/to/source:/source -e SYNC_SRC="/source" -e SYNC_DEST="dest:path" -e TZ="America/Argentina/Buenos_Aires" -e CRON="0 0 * * *" -e CRON_ABORT="0 6 * * *" -e FORCE_SYNC=1 -e CHECK_URL=https://hchk.io/hchk_uuid ghcr.io/robinostlund/docker-rclone-sync:latest
+```
+
+See [rclone sync docs](https://rclone.org/commands/rclone_sync/) for source/dest syntax and additional options.
