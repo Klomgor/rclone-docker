@@ -6,7 +6,7 @@ The defaults used by rclone if you do not specify are below. For details on what
 
 ## vfsOpt
 
-```
+```json
 {
     "CacheMaxAge": 3600000000000,
     "CacheMaxSize": -1,
@@ -40,7 +40,7 @@ The defaults used by rclone if you do not specify are below. For details on what
 
 ## mountOpt
 
-```
+```json
 {
     "AllowNonEmpty": false,
     "AllowOther": false,
